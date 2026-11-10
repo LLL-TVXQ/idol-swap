@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>追星物料互换 ✨</title>
+  <style>
+    :root {
+      --pink-100: #fff0f6;
+      --pink-200: #ffd6e8;
+      --pink-300: #ffadd2;
+      --pink-400: #ff85c0;
+      --pink-500: #f759ab;
+      --pink-600: #eb2f96;
+      --purple: #9b59b6;
+      --text: #5a3d4f;
+      --text-light: #9b7f8f;
+      --card-bg: #ffffff;
+      --shadow: 0 8px 24px rgba(235, 47, 150, 0.14);
+      --shadow-hover: 0 12px 32px rgba(235, 47, 150, 0.24);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", system-ui, sans-serif;
+      background: linear-gradient(160deg, #ffe3f0 0%, #fff0f6 40%, #fce4ec 100%);
+      color: var(--text);
+      padding: 24px 16px 48px;
+      position: relative;
+    }
+
+    body::before,
+    body::after {
+      content: "💗";
+      position: fixed;
+      font-size: 28px;
+      opacity: 0.18;
+      pointer-events: none;
+      animation: float 6s ease-in-out infinite;
+    }
+    body::before { top: 12%; left: 6%; }
+    body::after { content: "⭐"; bottom: 10%; right: 6%; animation-delay: -3s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(-8deg); }
+      50% { transform: translateY(-18px) rotate(8deg); }
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    /* 头部 */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding: 8px 4px;
+    }
+
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--pink-400), var(--purple));
+      display: grid;
+      place-items: center;
+      font-size: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      font-size: 26px;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, var(--pink-600), var(--purple));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      border-radius: 999px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn:active { transform: scale(0.96); }
+
+    .btn-primary {
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, var(--pink-500), var(--pink-600));
+      box-shadow: var(--shadow);
+    }
+    .btn-primary:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    /* 搜索框 */
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border-radius: 999px;
+      padding: 6px 8px 6px 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .search-bar .icon { font-size: 18px; }
+    .search-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      background: transparent;
+      padding: 8px 0;
+      min-width: 0;
+    }
+    .search-bar input::placeholder { color: #d3b6c4; }
+    .search-bar .clear {
+      border: none;
+      cursor: pointer;
+      background: var(--pink-100);
+      color: var(--pink-600);
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      white-space: nowrap;
+      display: none;
+    }
+    .search-bar .clear.visible { display: inline-block; }
+    .search-bar .clear:hover { background: var(--pink-200); }
+
+    .result-hint {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 12px;
+      padding-left: 6px;
+      display: none;
+    }
+    .result-hint.visible { display: block; }
+
+    /* 列表 */
+    .list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      animation: pop 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--pink-400), var(--purple));
+    }
+
+    @keyframes pop {
+      from { opacity: 0; transform: translateY(12px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .card-nick {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--pink-600);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-nick::before { content: "👑"; font-size: 15px; }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .row .label {
+      flex-shrink: 0;
+      width: 62px;
+      color: var(--text-light);
+      font-weight: 600;
+    }
+    .row .value {
+      flex: 1;
+      word-break: break-all;
+    }
+    .row .tag {
+      display: inline-block;
+      background: var(--pink-100);
+      color: var(--pink-600);
+      border-radius: 8px;
+      padding: 2px 8px;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--pink-200);
+    }
+    .time {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    .btn-del {
+      padding: 6px 14px;
+      font-size: 13px;
+      color: var(--pink-600);
+      background: var(--pink-100);
+    }
+    .btn-del:hover { background: var(--pink-200); }
+
+    /* 空状态 */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-light);
+    }
+    .empty .big { font-size: 56px; margin-bottom: 12px; }
+    .empty p { font-size: 15px; }
+
+    /* 弹窗 */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(90, 61, 79, 0.4);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+    .overlay.show { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 420px;
+      padding: 28px 26px;
+      box-shadow: 0 20px 60px rgba(235, 47, 150, 0.3);
+      animation: pop 0.25s ease;
+    }
+    .modal h2 {
+      text-align: center;
+      font-size: 20px;
+      color: var(--pink-600);
+      margin-bottom: 20px;
+    }
+
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--pink-200);
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .field input:focus {
+      border-color: var(--pink-400);
+      box-shadow: 0 0 0 4px rgba(255, 133, 192, 0.15);
+    }
+    .field input::placeholder { color: #d3b6c4; }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 22px;
+    }
+    .btn-submit {
+      flex: 1;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, var(--pink-500), var(--pink-600));
+      box-shadow: var(--shadow);
+    }
+    .btn-cancel {
+      flex: 1;
+      padding: 12px;
+      font-size: 15px;
+      color: var(--text-light);
+      background: var(--pink-100);
+    }
+    .btn-cancel:hover { background: var(--pink-200); }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 32px;
+      transform: translateX(-50%) translateY(20px);
+      background: #fff;
+      color: var(--pink-600);
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-size: 14px;
+      box-shadow: var(--shadow-hover);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 200;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-wrap">
+        <div class="title-icon">💌</div>
+        <div>
+          <h1>追星物料互换</h1>
+          <div class="subtitle">以物换物 · 快乐追星 · 双向奔赴 💕</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="openBtn">＋ 发布物料</button>
+    </header>
+
+    <!-- 搜索框 -->
+    <div class="search-bar">
+      <span class="icon">🔍</span>
+      <input id="searchInput" type="text" placeholder="搜索物料，例如：小卡、专辑、杂志…" />
+      <button class="clear" id="clearBtn">清除</button>
+    </div>
+    <div class="result-hint" id="resultHint"></div>
+
+    <div class="list" id="list"></div>
+  </div>
+
+  <!-- 发布弹窗 -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h2>发布一条互换信息 ✨</h2>
+      <form id="form" autocomplete="off">
+        <div class="field">
+          <label for="nick">粉丝昵称</label>
+          <input id="nick" type="text" placeholder="例如：小奶芙" required />
+        </div>
+        <div class="field">
+          <label for="give">出的物料</label>
+          <input id="give" type="text" placeholder="例如：XX 生日卡 / 杂志" required />
+        </div>
+        <div class="field">
+          <label for="want">求的物料</label>
+          <input id="want" type="text" placeholder="例如：XX 专辑小卡" required />
+        </div>
+        <div class="field">
+          <label for="wechat">微信号</label>
+          <input id="wechat" type="text" placeholder="方便对方联系你" required />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel" id="cancelBtn">取消</button>
+          <button type="submit" class="btn btn-submit">发布 💖</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "fan_materials_v1";
+
+      const listEl = document.getElementById("list");
+      const overlay = document.getElementById("overlay");
+      const form = document.getElementById("form");
+      const openBtn = document.getElementById("openBtn");
+      const cancelBtn = document.getElementById("cancelBtn");
+      const toastEl = document.getElementById("toast");
+      const searchInput = document.getElementById("searchInput");
+      const clearBtn = document.getElementById("clearBtn");
+      const resultHint = document.getElementById("resultHint");
+
+      // 读取本地数据
+      function loadItems() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function saveItems(items) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      function formatTime(ts) {
+        const d = new Date(ts);
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      }
+
+      // 根据关键字过滤
+      function filterItems(items, keyword) {
+        const kw = keyword.trim().toLowerCase();
+        if (!kw) return items;
+        return items.filter((item) => {
+          const haystack = [item.nick, item.give, item.want].join(" ").toLowerCase();
+          return haystack.includes(kw);
+        });
+      }
+
+      function render() {
+        const allItems = loadItems();
+        const keyword = searchInput.value;
+        const items = filterItems(allItems, keyword);
+
+        // 清除按钮显隐
+        clearBtn.classList.toggle("visible", keyword.length > 0);
+
+        // 结果提示
+        if (keyword.trim()) {
+          resultHint.textContent = `找到 ${items.length} 条包含「${keyword.trim()}」的信息`;
+          resultHint.classList.add("visible");
+        } else {
+          resultHint.classList.remove("visible");
+        }
+
+        if (allItems.length === 0) {
+          listEl.innerHTML = `
+            <div class="empty">
+              <div class="big">🎀</div>
+              <p>还没有互换信息～</p>
+              <p>点击右上角「发布物料」，开启第一段缘分吧！</p>
+            </div>`;
+          return;
+        }
+
+        if (items.length === 0) {
+          listEl.innerHTML = `
+            <div class="empty">
+              <div class="big">🔍</div>
+              <p>没有找到匹配「${escapeHtml(keyword.trim())}」的物料</p>
+              <p>换个关键词试试，或者发布一条你想要的物料吧～</p>
+            </div>`;
+          return;
+        }
+
+        listEl.innerHTML = items
+          .slice()
+          .reverse()
+          .map((item) => `
+            <div class="card">
+              <div class="card-nick">${escapeHtml(item.nick)}</div>
+              <div class="row">
+                <span class="label">出 🎁</span>
+                <span class="value tag">${escapeHtml(item.give)}</span>
+              </div>
+              <div class="row">
+                <span class="label">求 🔍</span>
+                <span class="value tag">${escapeHtml(item.want)}</span>
+              </div>
+              <div class="row">
+                <span class="label">微信 💬</span>
+                <span class="value">${escapeHtml(item.wechat)}</span>
+              </div>
+              <div class="card-footer">
+                <span class="time">${formatTime(item.createdAt)}</span>
+                <button class="btn btn-del" data-id="${item.id}">移除</button>
+              </div>
+            </div>`)
+          .join("");
+      }
+
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add("show");
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toastEl.classList.remove("show"), 1800);
+      }
+
+      function openModal() {
+        overlay.classList.add("show");
+        document.getElementById("nick").focus();
+      }
+
+      function closeModal() {
+        overlay.classList.remove("show");
+        form.reset();
+      }
+
+      function handleSubmit(e) {
+        e.preventDefault();
+        const nick = document.getElementById("nick").value.trim();
+        const give = document.getElementById("give").value.trim();
+        const want = document.getElementById("want").value.trim();
+        const wechat = document.getElementById("wechat").value.trim();
+
+        if (!nick || !give || !want || !wechat) return;
+
+        const item = {
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          nick, give, want, wechat,
+          createdAt: Date.now(),
+        };
+
+        const items = loadItems();
+        items.push(item);
+        saveItems(items);
+        render();
+        closeModal();
+        showToast("发布成功 💖");
+      }
+
+      // 事件绑定
+      listEl.addEventListener("click", (e) => {
+        const btn = e.target.closest(".btn-del");
+        if (!btn) return;
+        const id = btn.dataset.id;
+        const items = loadItems().filter((i) => i.id !== id);
+        saveItems(items);
+        render();
+        showToast("已移除");
+      });
+
+      searchInput.addEventListener("input", render);
+      clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        render();
+        searchInput.focus();
+      });
+
+      openBtn.addEventListener("click", openModal);
+      cancelBtn.addEventListener("click", closeModal);
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeModal();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && overlay.classList.contains("show")) closeModal();
+      });
+      form.addEventListener("submit", handleSubmit);
+
+      render();
+    })();
+  </script>
+</body>
+</html>
